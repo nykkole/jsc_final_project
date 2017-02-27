@@ -39,7 +39,7 @@ $('#input-form').on('submit', function(e) {
 	placeReference.push({
 		placeName: whichPlace,
 		coordinates: whereIsIt,  // places.coords throws an error. Why?
-		// placeType: whatIsIt,
+		placeType: whatIsIt,
 		description: tellMeMore
 	});
 	// call initMap
