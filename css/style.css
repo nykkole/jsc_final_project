@@ -1,0 +1,42 @@
+/*blue 
+#2e99e6
+
+yellow 
+#e6ca2e
+
+red
+#e62e62*/
+
+body {
+	font-family: sans-serif;
+	background: url("images/dr-seuss-street-sign-clipart-free-clip-art-images.jpg");
+	background-size: 50%;
+    background-repeat: no-repeat; 
+    background-position: right;
+}
+
+
+@media all and (max-width: 600px) {
+    body {
+        max-width: 100%;
+        background: none;
+    }
+
+    #map {
+    	height: 100px;
+    }
+}
+
+#map {
+	height: 300px;
+}
+
+h1 {
+	color: #2e99e6; /*blue #2e99e6*/
+	padding-bottom: 1em;
+}
+
+.addpadding {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
