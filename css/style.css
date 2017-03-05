@@ -12,9 +12,20 @@ body {
 	background: url("images/dr-seuss-street-sign-clipart-free-clip-art-images.jpg");
 	background-size: 50%;
     background-repeat: no-repeat; 
-    background-position: right;
+    background-position: right top;
 }
 
+#expand-btn {
+    margin-bottom: 30px;
+}
+
+#input-form {
+    display: none;
+}
+
+#marker {
+    height: 20px;
+}
 
 @media all and (max-width: 600px) {
     body {
