@@ -25,52 +25,68 @@ $('#expand-btn').on('click', function(e){
 $('#input-form').on('submit', function(e) {
 	e.preventDefault();
 	
+	var whichPlace;
+	var whereIsIt;
+	var whatIsIt;
+	var tellMeMore;
+
+	// clear error messages
+	$('#whichPlaceError').html('');
+	$('#whereIsItError').html('');
+	$('#whatIsItError').html('');
+
 	// get input from #whichPlace
-	var whichPlace = $('#whichPlace').val();
-	$('#whichPlace').val('');
-	console.log(whichPlace);
+	if ($('#whichPlace').val() === '') {
+		$('#whichPlaceError').html('Please enter a name.')
+	} else {
+		whichPlace = $('#whichPlace').val();
+	}
 	
 	// get input from #whereIsIt 
 	var whereIsItText = $('#whereIsIt').val(); // how to check that format is correct? TRY val <= 90 && val >= -90 and $.isNumeric(whereIsIt) --------------------
-	var whereIsIt = whereIsItText.split(', ');
+	whereIsIt = whereIsItText.split(', ');
 	whereIsIt[0] = Number(whereIsIt[0]); 
 	whereIsIt[1] = Number(whereIsIt[1]);
-	console.log('coordinates of new place ' + whereIsIt);
-	$('#whereIsIt').val('');
 	//console.log(whereIsIt);
+	if (whereIsIt[0] > 90 || isNaN(whereIsIt[0]) === true) {
+		$('#whereIsItError').html('Please enter your coordinates in this format: 29.954161, -90.068035');
+	} else if (whereIsIt[1] < -91 || isNaN(whereIsIt[1]) === true) {
+		$('#whereIsItError').html('Please enter your coordinates in this format: 29.954161, -90.068035');
+	}
+
 	
 	// get input from whatIsIt - radio input
-	var whatIsIt;
-	if ($('input[name=optradio]:checked').val() === 'Food&Drinks') {
+	if ($('input[name=optradio]:checked').val() === undefined) {
+		$('#whatIsItError').html('Please choose a type of place.');
+	} else if ($('input[name=optradio]:checked').val() === 'Food&Drinks') {
 		whatIsIt = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
 	} else if ($('input[name=optradio]:checked').val() === 'Fun') {
 		whatIsIt = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-	} else {
+	} else if ($('input[name=optradio]:checked').val() === 'Scenic place') {
 		whatIsIt = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png';
 	}
-	//var whatIsIt = $('input[name=optradio]:checked').val();
-	$('input[name=optradio]').prop('checked', false);
-	//console.log('whatIsIt = ' + whatIsIt);
 	
 	// get input from #tellMeMore
 	var tellMeMore = $('#tellMeMore').val();
-	$('#tellMeMore').val('');
 	
 	// save information in Firebase
 	// create section for places in db
-	var placeReference = database.ref('places');
-	placeReference.push({
-		placeName: whichPlace,
-		coordinates: whereIsIt,
-		placeType: whatIsIt,
-		description: tellMeMore
-	});
 	
-	// call initMap to refresh map with new data. doesn't seem to be needed.
-	//initMap();
-
-	// pat on the back
-	console.log('success');
+	if ($('#whatIsItError').html() === '' && $('#whereIsItError').html() === '' && $('#whichPlaceError').html() === '') {
+		$('#whichPlace').val('');
+		$('#whereIsIt').val('');
+		$('input[name=optradio]').prop('checked', false);
+		$('#tellMeMore').val('');
+		var placeReference = database.ref('places');
+			placeReference.push({
+			placeName: whichPlace,
+			coordinates: whereIsIt,
+			placeType: whatIsIt,
+			description: tellMeMore
+		});
+		// pat on the back
+		console.log('success');	
+	}
 });
 
 
@@ -119,24 +135,22 @@ function initMap() {
 
 // ------------------------- from API documentation
 // https://developers.google.com/maps/documentation/javascript/custom-markers
-
+var infowindow = new google.maps.InfoWindow({}); 
+var markers = [];
 // function to add pins to map
 	function addMarker(feature) {
-	console.log(feature.placesId);
+	//console.log(feature.placesId);
 	//console.log('feature.typeOfPlace = ' + feature.typeOfPlace);
 		var contentString = '<div id="content">'+
 	    		'<div id="siteNotice">'+
 	    		'</div>'+
-		    	'<h1 class="firstHeading">'+feature.name+'</h1>'+  //titel goes here
-		    	'<div id="bodyContent" id="' + feature.placesId + '">'+  //can I have 2 IDs in one element? --------------
+		    	'<h3 class="firstHeading">'+feature.name+'</h3>'+  //titel goes here
+		    	'<div id="bodyContent" data-id="' + feature.placesId + '">'+  //can I have 2 IDs in one element? --------------
 		    		'<p>'+feature.description+'</p>'+   // description goes here
 		    		'<button class="btn btn-default delete">Delete</button>'
 		    	'</div>'+
 	    	'</div>';
-			var infowindow = new google.maps.InfoWindow({
-	    		content: contentString,
-	    		maxWidth: 200
-	  	});
+
 		var marker = new google.maps.Marker({
 			position: {lat: feature.position[0], lng: feature.position[1]},
 			map: map,
@@ -145,39 +159,62 @@ function initMap() {
 		});
 		//eventlistener to display information when pin is clicked
 		marker.addListener('click', function() {
-			// infowindow.setContent('this is a string');
-			infowindow.close(); // how to close other open infowindows? ----------------------
+			infowindow.close();
+			infowindow = new google.maps.InfoWindow({
+	    		content: contentString,
+	    		//maxWidth: 200
+	  		});
 	     	infowindow.open(map, this);
 	  	 });
+
+		markers.push(marker);
+
+		// google.maps.event.addDomListener(marker,'click',(function(marker) {
+		//                         return function() {
+		//                           //alert('clicked ' + cityList[i][0])
+		//                           console.log(marker);
+		//                         }
+		//                       })(marker));
+
 	}
 
-	// test
     // use reference to database to listen for changes in places data
-	database.ref('places').on('value', function (results) {  //Firebase database works in real time.
-	    // Get all places stored in the results we received back from Firebase
-	    var allPlaces = results.val();
+    var populateMap = function() {
+		database.ref('places').on('value', function (results) {  //Firebase database works in real time.
+		    // Get all places stored in the results we received back from Firebase
+		    var allPlaces = results.val();
 
-		// for loop goes through database and calls addMarker() to add pins to map
-		for (var item in allPlaces) {
-		// Create an object literal with the data we'll pass to addMarker function
-			var all = {
-				position: allPlaces[item].coordinates,
-				name: allPlaces[item].placeName,
-				description: allPlaces[item].description,
-				typeOfPlace: allPlaces[item].placeType,
-				placesId: item
-			};
+			// for loop goes through database and calls addMarker() to add pins to map
+			for (var item in allPlaces) {
+			// Create an object literal with the data we'll pass to addMarker function
+				var all = {
+					position: allPlaces[item].coordinates,
+					name: allPlaces[item].placeName,
+					description: allPlaces[item].description,
+					typeOfPlace: allPlaces[item].placeType,
+					placesId: item
+				};
 
-			addMarker(all);
-		}
-	});
+				addMarker(all);
+			}
+		});
+	};
+
+	$('.container').on('click', '.delete', function(e) {
+			// Get the ID for the place to delete
+			var id = $(e.target).parent().data('id');
+			//console.log(e);
+			// find places whose objectId is equal to the id we're searching with
+			var placeReference = database.ref('places/' + id);
+			// Use remove method to remove the place from the database
+			placeReference.remove();
+			infowindow.close();
+			for (var i = 0; i < markers.length; i++) {
+				markers[i].setMap(null);
+			}
+			
+			populateMap();
+		});
+	populateMap();
 };
 
-$('.delete').on('click', function (e) {  // something doesn't work ----------------
-  // Get the ID for the place to delete
-  var id = $(e.target).parent('id');
-  // find places whose objectId is equal to the id we're searching with
-  var placeReference = database.ref('places/' + id);
-  // Use remove method to remove the place from the database
-  placeReference.remove();
-});

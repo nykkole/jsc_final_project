@@ -16,15 +16,17 @@
 	    <div class="row">
 	        <div class="col-xs-12 col-md-4">
 	        	<div class="form-group">
-	    			<label for="place">Which place?</label>
+	    			<label for="place">Which place?*</label>
 	    			<input type="text" id="whichPlace" class="form-control" placeholder="Carousel Bar">
+	    			<p id="whichPlaceError"></p>
 	    		</div>
 		        <div class="form-group">
-		    		<label for="coords">Where is it?</label>
+		    		<label for="coords">Where is it?*</label>
 		    		<input type="text" id="whereIsIt" class="form-control" placeholder="29.954161, -90.068035">
+		    		<p id="whereIsItError"></p>
 		        </div>
 	       		<div class="form-group">
-		  			<label for="place-type">What is it?</label>  <!-- id="whatIsIt" -->
+		  			<label for="place-type">What is it?*</label>  <!-- id="whatIsIt" -->
 			  		<div class="radio">
 		  				<label><input type="radio" name="optradio" value="Food&Drinks">Food&Drinks</label>
 					</div>
@@ -34,6 +36,7 @@
 					<div class="radio">
 						<label><input type="radio" name="optradio" value="Scenic place">Scenic place</label>
 					</div>
+					<p id="whatIsItError"></p>
         		</div>
         	</div>
 	        <div class="col-xs-12 col-md-4">
